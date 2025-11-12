@@ -36,3 +36,7 @@ jobs:
         run: |
           ./create-n-publish-product.sh
         shell: bash
+
+      #cat the output file. in case of an error more info is in here
+      - name: Show asset creation output
+        run: cat ./json_files/asset-created.json
