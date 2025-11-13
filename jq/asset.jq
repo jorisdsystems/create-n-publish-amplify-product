@@ -6,7 +6,7 @@
     "metadata": {
         "scope": {
           "kind": "Team",
-          "name": "Lab"
+          "name": "Portal Development"
         }
       },
     "spec": {
