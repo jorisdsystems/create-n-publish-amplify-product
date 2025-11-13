@@ -36,6 +36,8 @@ jobs:
         run: |
           ./create-n-publish-product.sh
         shell: bash
+        # for debugging reasons only continue on error
+        continue-on-error: true
 
       #cat the output file. in case of an error more info is in here
       - name: Show asset creation output
