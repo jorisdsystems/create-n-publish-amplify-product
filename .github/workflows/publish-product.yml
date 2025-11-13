@@ -34,7 +34,7 @@ jobs:
         run: axway config list
         #Set the team context explicitely here ;
       - name: Set Axway team context
-        run: axway config set central.team Portal\ Development
+        run: axway config set central.team "Portal Development"
       - name: Create Asset, Product, and publish Product to Marketplace
         env:
           CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
