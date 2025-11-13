@@ -1,4 +1,4 @@
-y  #!/bin/bash
+#!/bin/bash
 
 echo "Running the script"
 
