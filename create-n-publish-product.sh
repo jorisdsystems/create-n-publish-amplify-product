@@ -47,7 +47,8 @@ axway config set central.team "Portal Development"
 jq -n -f ./jq/asset.jq --arg title "$ASSET_TITLE" > ./json_files/asset.json
 #axway central create -f ./json_files/asset.json -o json -y > ./json_files/asset-created.json 
 
-#testing: override the team
+#testing: override the team and first cat the asset
+cat ./json_files/asset.json
 axway central create -f ./json_files/asset.json --team "Portal Development" -o json -y > ./json_files/asset-created.json
 
 error_exit "Problem when creating an asset" "./json_files/asset-created.json"
