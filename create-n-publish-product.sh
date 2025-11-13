@@ -1,4 +1,4 @@
-#!/bin/bash
+y  #!/bin/bash
 
 echo "Running the script"
 
@@ -41,7 +41,7 @@ error_exit "Problem with authentication to your account. Please, verify your cre
 # creating a working dir for JSON files
 mkdir ./json_files
 
-#Set the team context explicitely here ;
+#Verify ! Set the team context explicitely here ;
 axway config set central.team "Portal Development"
       
 jq -n -f ./jq/asset.jq --arg title "$ASSET_TITLE" > ./json_files/asset.json
