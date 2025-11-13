@@ -30,6 +30,11 @@ jobs:
           axway pm install @axway/axway-central-cli
       
       # Runs a set of commands using the runners shell
+      - name: Show current Axway team
+        run: axway config list
+        #Set the team context explicitely here ;
+      - name: Set Axway team context
+        run: axway config set central.team="Portal Development"
       - name: Create Asset, Product, and publish Product to Marketplace
         env:
           CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
