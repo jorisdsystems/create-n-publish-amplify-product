@@ -200,7 +200,11 @@ error_exit "Problem creating a product document" "./json_files/document-created.
 
 echo "Query and create (if needed) a Product category"
 axway central get product $PRODUCT_NAME -o json | jq '.spec.categories |= . + [env.categoryName]' > ./json_files/product-updated.json
-echo $(cat ./json_files/product-updated.json | jq 'del(. | .references?)') > ./json_files/product-updated.json
+#echo $(cat ./json_files/product-updated.json | jq 'del(. | .references?)') > ./json_files/product-updated.json
+echo "Product updated json is: "
+cat ./json_files/product-updated.json
+echo "Removeing References and latestrelease"
+jq '.state = "active" | del(.references) | del(.latestrelease)' ./json_files/product-updated.json > ./json_files/product-updated.tmp && mv ./json_files/product-updated.tmp ./json_files/product-updated.json
 axway central apply -f ./json_files/product-updated.json
 
 error_exit "Problem with assigning a Category to the Product"
