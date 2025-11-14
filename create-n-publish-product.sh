@@ -42,20 +42,21 @@ error_exit "Problem with authentication to your account. Please, verify your cre
 mkdir ./json_files
 
 #Verify ! Set the team context explicitely here ;
-axway config set central.team "Portal Development"
+#axway config set central.team "Portal Development"
       
 jq -n -f ./jq/asset.jq --arg title "$ASSET_TITLE" > ./json_files/asset.json
 #axway central create -f ./json_files/asset.json -o json -y > ./json_files/asset-created.json 
 
-#testing: override the team and first cat the asset
+echo "create the new asset"
 cat ./json_files/asset.json
-axway central create -f ./json_files/asset.json --team "Portal Development" -o json -y > ./json_files/asset-created.json
+axway central create -f ./json_files/asset.json -o json -y > ./json_files/asset-created.json
 
 error_exit "Problem when creating an asset" "./json_files/asset-created.json"
 
 # Setting ASSET_NAME that will be used by other commands
 export ASSET_NAME=$(jq -r .[0].name ./json_files/asset-created.json)
 
+echo "getting all Service Instances (apis)"
 axway central get apisi  -s $ENVIRONMENT_NAME -o json > ./json_files/api-instances.json
 error_exit "Problem getting Service Instances" "./json_files/api-instances.json"
 
@@ -80,6 +81,7 @@ else
    export STAGE_NAME=$(axway central get stages -q title=="\"$STAGE_TITLE\"" -o json | jq -r .[0].name)
 fi
 
+echo "Looping through all services and map them to the new asset"
 for (( i=0; i<$COUNT; i++ ))
 do 
    # Get all necessary information about Service, Service Revision and Instance
@@ -116,12 +118,13 @@ axway central get asset $ASSET_NAME -o json | jq '.spec.categories |= . + [env.c
 error_exit "Problem assigning a Category to the Asset" "./json_files/asset-updated.json"
 
 # Adding an image to the Asset
-
+echo "Add Image to asset"
 export encodedImage=`base64 -w 0 ./images/my-asset.png`
 echo $(cat ./json_files/asset-updated.json | jq '.icon = "data:image/png;base64," + env.encodedImage') > ./json_files/asset-updated.json
 
 # Now we change the state of the Asset to state "Active" and remove "references" element, as it gives us an error (it is a know issue)
 
+echo "change Asset state to Active"
 echo $(cat ./json_files/asset-updated.json | jq '.state = "active"' | jq 'del(. | .references)') > ./json_files/asset-updated.json
 
 
@@ -133,7 +136,7 @@ error_exit "Problem changing Asset to the active state"
 
 # Now we need to add a release tag, otherwise Amplify won't allow us to use this asset in Product Foundry commands
 # Create a release tag file from a template
-
+echo "Create release tag"
 jq --slurp -f ./jq/asset-release-tag.jq ./json_files/asset-created.json > ./json_files/asset-release-tag.json
 axway central create -f ./json_files/asset-release-tag.json -o json -y > ./json_files/asset-release-tag-created.json
 
@@ -147,14 +150,14 @@ error_exit "Problem creating release tag" "./json_files/asset-release-tag-create
 #######################################################
 
 # Create a Product JSON file from the JQ filter file
-
+echo "Create a Product"
 jq -n -f ./jq/product.jq --arg product_title "$PRODUCT_TITLE" --arg asset_name "$ASSET_NAME" --arg description "$PRODUCT_DESCRIPTION" > ./json_files/product.json
 axway central create -f ./json_files/product.json -y -o json > ./json_files/product-created.json
 
 error_exit "Problem creating a Product" "./json_files/product-created.json"
 
 # Adding image to the Product object
-
+echo "Adding image to the Product object"
 export PRODUCT_NAME=`jq -r .[0].name ./json_files/product-created.json`
 export encodedImage=`base64 -w 0 ./images/my-company.png`
 axway central get product $PRODUCT_NAME -o json | jq '.icon = "data:image/png;base64," + env.encodedImage' > ./json_files/product-updated.json
@@ -165,6 +168,7 @@ axway central apply -f ./json_files/product-updated.json
 
 # Now create DOCs for our PRODUCT
 
+echo "create DOCs for our PRODUCT"
 export articleTitle="Overview"
 export articleContent=$(<./jq/doc_content.md)
 jq -f ./jq/article.jq ./json_files/product-created.json > ./json_files/article.json
@@ -186,6 +190,7 @@ error_exit "Problem creating a product document" "./json_files/document-created.
 
 # Query and create (if needed) a Product category
 
+echo "Query and create (if needed) a Product category"
 axway central get product $PRODUCT_NAME -o json | jq '.spec.categories |= . + [env.categoryName]' > ./json_files/product-updated.json
 echo $(cat ./json_files/product-updated.json | jq 'del(. | .references?)') > ./json_files/product-updated.json
 axway central apply -f ./json_files/product-updated.json
@@ -196,6 +201,7 @@ error_exit "Problem with assigning a Category to the Product"
 
 # Change Product state to Active
 
+echo "Change Product state to Active"
 axway central get product $PRODUCT_NAME -o json  | jq '.state = "active"' > ./json_files/product-updated.json
 echo $(cat ./json_files/product-updated.json | jq 'del(. | .references?)') > ./json_files/product-updated.json
 axway central apply -f ./json_files/product-updated.json
@@ -206,6 +212,7 @@ error_exit "Problem when changing Product state to Active"
 
 # Create a Product release tag
 
+"echo Create a Product release tag"
 jq -f ./jq/product-release-tag.jq ./json_files/product-created.json > ./json_files/product-release-tag.json
 axway central create -f ./json_files/product-release-tag.json -o json -y > ./json_files/product-release-tag-created.json
 
@@ -215,6 +222,7 @@ error_exit "Problem creating a Product release tag" "./json_files/product-releas
 
 #  Create a Product Plan (Free)
 
+echo "Create a Product Plan"
 jq -f ./jq/product-plan.jq ./json_files/product-created.json > ./json_files/product-plan.json
 axway central create -f ./json_files/product-plan.json -o json -y > ./json_files/product-plan-created.json
 
@@ -228,6 +236,7 @@ export PRODUCT_PLAN_NAME=`jq -r .[0].name ./json_files/product-plan-created.json
 # It will be populated in the following loop
 # FYI, we get a list of Asset Resources from the latest release
 
+echo "Create a quota in Product Plan"
 jq -n -f jq/quota.jq --arg quota_title "$QUOTA_TITLE" --arg product_plan_name "$PRODUCT_PLAN_NAME" > json_files/quota.json
 
 LATEST_RELEASE=$(axway central get assetreleases -o json | jq 'del(.[] | select(.spec.asset != $ENV.ASSET_NAME))' | jq -r '.|.[].spec.version' | sort -t= -nr -k3 - | head -1)
@@ -252,6 +261,7 @@ error_exit "Problem with creating Quota" "json_files/quota-created.json"
 
 # Activate Product Plan
 
+echo "Activate Product Plan"
 axway central get productplans $PRODUCT_PLAN_NAME -o json  | jq '.state = "active"' > ./json_files/product-plan-updated.json
 echo $(cat ./json_files/product-plan-updated.json | jq 'del(. | .status?, .references?)') > ./json_files/product-plan-updated.json
 axway central apply -f ./json_files/product-plan-updated.json
@@ -262,6 +272,7 @@ error_exit "Problem with change Product Plan to the active state"
 
 # Publish to the Marketplace
 
+echo "Publish to the Marketplace"
 axway central get marketplaces -o json > ./json_files/marketplace.json
 jq --slurp -f ./jq/publish-product.jq ./json_files/marketplace.json ./json_files/product-created.json  > ./json_files/publish-product.json
 axway central create -f ./json_files/publish-product.json -o json -y > ./json_files/publish-product-created.json
