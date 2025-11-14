@@ -146,6 +146,10 @@ error_exit "Problem changing Asset to the active state"
 # Create a release tag file from a template
 echo "Create release tag"
 jq --slurp -f ./jq/asset-release-tag.jq ./json_files/asset-created.json > ./json_files/asset-release-tag.json
+
+echo "release tag created json is:"
+cat ./json_files/asset-release-tag.json
+
 axway central create -f ./json_files/asset-release-tag.json -o json -y > ./json_files/asset-release-tag-created.json
 
 error_exit "Problem creating release tag" "./json_files/asset-release-tag-created.json"
@@ -170,6 +174,9 @@ export PRODUCT_NAME=`jq -r .[0].name ./json_files/product-created.json`
 export encodedImage=`base64 -w 0 ./images/my-company.png`
 axway central get product $PRODUCT_NAME -o json | jq '.icon = "data:image/png;base64," + env.encodedImage' > ./json_files/product-updated.json
 echo $(cat ./json_files/product-updated.json | jq 'del(. | .references?)') > ./json_files/product-updated.json
+
+echo "product update incl image:"
+cat ./json_files/product-updated.json
 axway central apply -f ./json_files/product-updated.json
 
 
