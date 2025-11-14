@@ -127,7 +127,8 @@ echo $(cat ./json_files/asset-updated.json | jq '.icon = "data:image/png;base64,
 echo "change Asset state to Active"
 echo $(cat ./json_files/asset-updated.json | jq '.state = "active"' | jq 'del(. | .references)') > ./json_files/asset-updated.json
 #remove the release stuff. it gives a security error otherwise
-jq 'map(del(.latestrelease))' ./json_files/asset-updated.json > ./json_files/asset-updated.json
+jq 'map(del(.latestrelease))' ./json_files/asset-updated.json > ./json_files/asset-updated.tmp && mv ./json_files/asset-updated.tmp ./json_files/asset-updated.json
+
 
 #echo $(cat ./json_files/asset-updated.json | jq '.state = "active"' | jq 'del(. | .references)') |jq 'del(.latestrelease)'> ./json_files/asset-updated.json
 
