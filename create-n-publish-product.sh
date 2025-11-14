@@ -239,7 +239,7 @@ error_exit "Problem when changing Product state to Active"
 
 # Create a Product release tag
 
-"echo Create a Product release tag"
+echo "Create a Product release tag"
 jq -f ./jq/product-release-tag.jq ./json_files/product-created.json > ./json_files/product-release-tag.json
 axway central create -f ./json_files/product-release-tag.json -o json -y > ./json_files/product-release-tag-created.json
 
