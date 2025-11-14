@@ -125,9 +125,11 @@ echo $(cat ./json_files/asset-updated.json | jq '.icon = "data:image/png;base64,
 # Now we change the state of the Asset to state "Active" and remove "references" element, as it gives us an error (it is a know issue)
 
 echo "change Asset state to Active"
-#echo $(cat ./json_files/asset-updated.json | jq '.state = "active"' | jq 'del(. | .references)') > ./json_files/asset-updated.json
+echo $(cat ./json_files/asset-updated.json | jq '.state = "active"' | jq 'del(. | .references)') > ./json_files/asset-updated.json
 #remove the release stuff. it gives a security error otherwise
-echo $(cat ./json_files/asset-updated.json | jq '.state = "active"' | jq 'del(. | .references)') |jq 'del(.latestrelease)'> ./json_files/asset-updated.json
+jq 'map(del(.latestrelease))' ./json_files/asset-updated.json > ./json_files/asset-updated.json
+
+#echo $(cat ./json_files/asset-updated.json | jq '.state = "active"' | jq 'del(. | .references)') |jq 'del(.latestrelease)'> ./json_files/asset-updated.json
 
 echo "asset updated json contains:"
 cat ./json_files/asset-updated.json
