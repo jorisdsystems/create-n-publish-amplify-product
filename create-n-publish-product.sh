@@ -1,4 +1,4 @@
-#!/bin/bash
+o#!/bin/bash
 
 echo "Running the script"
 
@@ -47,7 +47,7 @@ mkdir ./json_files
 jq -n -f ./jq/asset.jq --arg title "$ASSET_TITLE" > ./json_files/asset.json
 #axway central create -f ./json_files/asset.json -o json -y > ./json_files/asset-created.json 
 
-echo "create the new asset"
+echo "create the new asset. output of asset.json:"
 cat ./json_files/asset.json
 axway central create -f ./json_files/asset.json -o json -y > ./json_files/asset-created.json
 
@@ -127,6 +127,8 @@ echo $(cat ./json_files/asset-updated.json | jq '.icon = "data:image/png;base64,
 echo "change Asset state to Active"
 echo $(cat ./json_files/asset-updated.json | jq '.state = "active"' | jq 'del(. | .references)') > ./json_files/asset-updated.json
 
+echo "asset updated json contains:"
+cat ./json_files/asset-updated.json
 
 axway central apply -f ./json_files/asset-updated.json
 error_exit "Problem changing Asset to the active state"
