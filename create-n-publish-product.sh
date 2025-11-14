@@ -227,6 +227,8 @@ error_exit "Problem with assigning a Category to the Product"
 echo "Change Product state to Active"
 axway central get product $PRODUCT_NAME -o json  | jq '.state = "active"' > ./json_files/product-updated.json
 echo $(cat ./json_files/product-updated.json | jq 'del(. | .references?)') > ./json_files/product-updated.json
+echo "product-updated.json before apply;"
+cat ./json_files/product-updated.json
 axway central apply -f ./json_files/product-updated.json
 
 error_exit "Problem when changing Product state to Active"
