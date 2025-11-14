@@ -173,7 +173,10 @@ echo "Adding image to the Product object"
 export PRODUCT_NAME=`jq -r .[0].name ./json_files/product-created.json`
 export encodedImage=`base64 -w 0 ./images/my-company.png`
 axway central get product $PRODUCT_NAME -o json | jq '.icon = "data:image/png;base64," + env.encodedImage' > ./json_files/product-updated.json
-echo $(cat ./json_files/product-updated.json | jq 'del(. | .references?)') > ./json_files/product-updated.json
+#echo $(cat ./json_files/product-updated.json | jq 'del(. | .references?)') > ./json_files/product-updated.json
+#bovenstaand commando breekt de json omdat de echo quotes etc strips !
+#veranderd door;
+jq 'del(.references)' ./json_files/product-updated.json > ./json_files/product-updated.tmp && mv ./json_files/product-updated.tmp ./json_files/product-updated.json
 
 echo "product update incl image:"
 cat ./json_files/product-updated.json
